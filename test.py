@@ -36,7 +36,7 @@ def test():
     content = r1.read()
     print("status=", r1.status, "content=", content)
     conn.close()
-    if r1.status == 200 and content == bytes("Invalid request parameter format", "ascii"):
+    if r1.status == 404 and content == bytes("You are sending an invalid request", "ascii"):
         print("Test point 2 pass")
         tot_pass = tot_pass + 1
     else:
@@ -48,7 +48,7 @@ def test():
     content = r1.read()
     print("status=", r1.status, "content=", content)
     conn.close()
-    if r1.status == 200 and content != bytes("Invalid request parameter format", "ascii"):
+    if r1.status == 404 and content == bytes("You are sending an invalid request", "ascii"):
         print("Test point 3 pass")
         tot_pass = tot_pass + 1
     else:
@@ -59,7 +59,7 @@ def test():
     content = r1.read()
     print("status=", r1.status, "content=", content)
     conn.close()
-    if r1.status == 200 and content == bytes("Invalid return value from backend", "ascii"):
+    if r1.status == 404 and content == bytes("You are sending an invalid request", "ascii"):
         print("Test point 4 pass")
         tot_pass = tot_pass + 1
     else:

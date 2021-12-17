@@ -89,6 +89,18 @@ def test():
     else:
         print("Test point 6 fail")
 
+    # post and query
+    conn.request("POST", "/login?uuid=0001&token=2334")
+    r1 = conn.getresponse()
+    content = r1.read()
+    print("status=", r1.status, "content=", content)
+    conn.close()
+    if r1.status == 200 and content == bytes("a valid data processing value\n", "ascii"):
+        print("Test point 7 pass")
+        tot_pass = tot_pass + 1
+    else:
+        print("Test point 7 fail")
+
     print("Total poss", tot_pass, "points")
 
 if __name__ == "__main__":

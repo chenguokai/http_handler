@@ -39,6 +39,14 @@ class webController(Controller):
 
     def handle_post(self):
         print("handle post: ", self._uuid, self._token)
+        if self._filename.startswith("login") or self._filename.startswith("register"):
+            # replace default with register module
+            handler = default()
+            backend_response = handler.handle_register(self._uuid, self._token, self._filename)
+            if backend_response is None:
+                return self.code_ok + self.server_info + self.backend_invalid
+            else:
+                return self.code_ok + self.server_info + backend_response
         if self._uuid is None or self._token is None:
             return self.code_not_found + self.server_info + self.request_invalid
         self.add_to_database(self._uuid, self._token)

@@ -64,26 +64,36 @@ class HTTPServer(object):
         method = re.match(r"(\w+) +/[^ ]* ", request_start_line.decode("utf-8")).group(1)
         parameter_idx = file_name.find("?")
         parameter = file_name[parameter_idx + 1:]
-        file_name = file_name[1:parameter_idx]
-        print("file_name: ", file_name)
         print("parameter: ", parameter)
+        if method == "POST":
+            file_name = file_name[1:]
+        else:
+            file_name = file_name[1:parameter_idx]
+
+        print("file_name: ", file_name)
         print("method: ", method)
         response_start_line = "HTTP/1.1 200 OK\r\n"
         response_headers = "Server: My server\r\n"
         response_body = "Cannot understand"
 
-        parameter_seperator_idx = parameter.find("&")
-        parameter_uuid_idx = parameter.find("uuid=")
-        parameter_token_idx = parameter.find("token=")
+        if method == "POST":
+            parameter = request_lines[-1]
+            print("parameter for post: ", parameter)
+
+        encoding = 'utf-8'
+        parameter_seperator_idx = parameter.find(b"&")
+        parameter_uuid_idx = parameter.find(b"uuid=")
+        parameter_token_idx = parameter.find(b"token=")
         if (parameter_uuid_idx >= parameter_seperator_idx or parameter_token_idx < parameter_seperator_idx):
             parameter_uuid = None
             parameter_token = None
         else:
-            parameter_uuid = parameter[parameter_uuid_idx + 5:parameter_seperator_idx]
-            parameter_token = parameter[parameter_token_idx + 6:]
+            parameter_uuid = parameter[parameter_uuid_idx + 5:parameter_seperator_idx].decode(encoding)
+            parameter_token = parameter[parameter_token_idx + 6:].decode(encoding)
         print("uuid=", parameter_uuid, ", token=", parameter_token)
         handler = webController()
         handler.web_params(file_name, parameter_token, parameter_uuid)
+        print("debug: method type ", type(method))
         handler.request = method
 
 

@@ -56,10 +56,12 @@ class webController(Controller):
         if self._filename.startswith("/index") or self._filename == "/":
             return self.code_ok + self.server_info + self.reply_no_service
         if self._filename.endswith("_call"):
+            print("x_calls, token=", self._token, " uuid=", self._uuid)
             if self._uuid is None or self._token is None:
                 return self.handle_invalid_format()
             token_find = self.find(self._uuid)
-            if not (token_find is None ) and token_find == self._token:
+            if token_find is None or token_find != self._token:
+                print("token mismatch")
                 return self.handle_invalid_format()
             # call backend
             handler = default()

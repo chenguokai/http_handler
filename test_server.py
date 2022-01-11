@@ -10,14 +10,14 @@ sys.path.append(lib_path)
 
 from main import main
 
-def test():
-    # this is a test
-    time.sleep(1)
-    print("wait finish, test begin")
-    conn = http.client.HTTPConnection("localhost:8000")
-    tot_pass = 0
+def test_invalid_file():
+    try:
+        _thread.start_new_thread(main, ())
+    except:
+        assert "Error: unable to start thread"
 
-    # functinal tests
+    time.sleep(1)
+    conn = http.client.HTTPConnection("localhost:8000")
 
     # invalid file
     conn.request("GET", "/doc")
@@ -25,11 +25,16 @@ def test():
     content = r1.read()
     print("status=", r1.status, "content=", content)
     conn.close()
-    if r1.status == 404 and content == bytes("You are sending an invalid request", "ascii"):
-        print("Test point 1 pass")
-        tot_pass = tot_pass + 1
-    else:
-        print("Test point 1 fail")
+    assert r1.status == 404 and content == bytes("You are sending an invalid request", "ascii")
+
+def test_invalid_parameter():
+    try:
+        _thread.start_new_thread(main, ())
+    except:
+        assert "Error: unable to start thread"
+
+    time.sleep(1)
+    conn = http.client.HTTPConnection("localhost:8000")
 
     # valid file invalid parameter
     conn.request("GET", "/e_call?token=2333&uuid=0000")
@@ -37,11 +42,26 @@ def test():
     content = r1.read()
     print("status=", r1.status, "content=", content)
     conn.close()
-    if r1.status == 404 and content == bytes("You are sending an invalid request", "ascii"):
-        print("Test point 2 pass")
-        tot_pass = tot_pass + 1
-    else:
-        print("Test point 2 fail")
+    assert r1.status == 404 and content == bytes("You are sending an invalid request", "ascii")
+
+def test_invalid_parameter():
+    try:
+        _thread.start_new_thread(main, ())
+    except:
+        assert "Error: unable to start thread"
+
+    time.sleep(1)
+    conn = http.client.HTTPConnection("localhost:8000")
+
+    # valid file invalid parameter
+    conn.request("GET", "/j_call?uuid=0000&token=2333")
+    r1 = conn.getresponse()
+    content = r1.read()
+    print("status=", r1.status, "content=", content)
+    conn.close()
+    assert r1.status == 200
+
+'''
 
     # valid file valid parameter
     conn.request("GET", "/j_call?uuid=0000&token=2333")
@@ -120,10 +140,8 @@ def test():
 if __name__ == "__main__":
     print("starting test")
 
-    try:
-        _thread.start_new_thread(main, ())
-        _thread.start_new_thread(test, ())
-    except:
-        print("Error: unable to start thread")
+
     while 1:
         pass
+        
+'''

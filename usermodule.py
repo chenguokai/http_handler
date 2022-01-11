@@ -4,6 +4,7 @@ import dbutil
 import uuid
 import http.client
 import json
+import os
 
 class UserModule:
 
@@ -40,6 +41,7 @@ class UserModule:
         if result == False:
             return json.dumps(self.construct_return(False, "database error", ''))
         else:
+            os.mkdir("/var/www/html/data/" + name)
             return json.dumps(self.construct_return(True, "registration succeeded", ''))
 
     def login(self, name, password):
@@ -50,6 +52,7 @@ class UserModule:
             return json.dumps(self.construct_return(False, "wrong username or password", ''))
         md5pw = hashlib.md5(password.encode(encoding='UTF-8')).hexdigest()
         if md5pw == find_result[0][1]:
+            uuidstr = str(uuid.uuid4())
             return json.dumps(self.construct_return(True, "login succeeded", uuidstr))
         else:
             return json.dumps(self.construct_return(False, "wrong username or password", ''))

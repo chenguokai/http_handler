@@ -118,7 +118,7 @@ class HTTPServer(object):
 def main():
     sys.path.insert(1, WSGI_PYTHON_DIR)
     http_server = HTTPServer()
-    http_server.bind(8000)
+    http_server.bind(8080)
     http_server.start()
 
 

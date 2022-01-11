@@ -5,8 +5,9 @@ from Config import config
 
 class DataCleanHelper:
 
-    def __init__(self) -> None:
-        self.__encoding = config.encoding
+    def __init__(self,isWechat) -> None:
+        self.isWechat = isWechat
+        self.__encoding = config.encoding_wechat if isWechat else config.encoding_alipay
         self.__focus = config.focus
 
     def is_wechat(self,file):
@@ -82,15 +83,19 @@ class DataCleanHelper:
         '''
         USER = user
         PWD = os.path.abspath('.')
-        FILE_RAW = os.path.join(PWD,"resources",USER,"raw")
+        prefix = "wechat" if self.isWechat else "alipay"
+        FILE_RAW = os.path.join(PWD,"resources",USER,prefix,"raw")
         DIR_RAW = os.listdir(FILE_RAW)
-        FILE_CSV = os.path.join(PWD,"resources",USER,"clean")
+        FILE_CSV = os.path.join(PWD,"resources",USER,prefix,"clean")
         DIR_CSV = os.listdir(FILE_CSV)
         flag = -1
 
         # name of the columns
         # 交易号，商家订单号，交易创建时间，付款时间，最近修改时间，交易来源地 ，类型，交易对方  ，商品名称 ，金额（元），收/支  ，交易状态，服务费（元），成功退款（元），备注，资金状态 
         columns = self.__focus
+
+        if len(DIR_RAW) == 0 :
+            return pd.DataFrame(columns = self.__focus) #创建一个空的dataframe
 
         if len(DIR_RAW) != 1 :
             print("more than 1 file in raw directory")

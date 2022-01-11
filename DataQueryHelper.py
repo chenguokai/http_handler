@@ -25,32 +25,32 @@ class DataQueryHelper:
     def get_year_income(self,df,year):
         '''
         format 
-        {
+        [
             '1' : 10,
             '2' : 1000,
             ...
             '12' : 1000
-        }
+        ]
         '''
-        result = {}
+        result = []
         for i in range(12):
-            result[(i + 1)] = self.get_monthly_income(df,year,i+1)
+            result.append(self.get_monthly_income(df,year,i+1))
         return result
 
 
     def get_year_outcome(self,df,year):
         '''
         format
-        {
+        [
             '1' : 10,
             '2' : 1000,
             ...
             '12' : 1000
-        }
+        ]
         '''
-        result = {}
+        result = []
         for i in range(12):
-            result[(i + 1)] = self.get_monthly_outcome(df,year,i+1)
+            result.append(self.get_monthly_outcome(df,year,i+1))
         return result
 
     def sort_by_cost(self,df,type,ISoutcome=True):
@@ -94,4 +94,63 @@ class DataQueryHelper:
             if tmp[(i + 1)] != 0:
                 res.append((i + 1))
         return res
+
+    def get_income(self,df):
+        res = {}
+        res["state"] = False if df.empty else True
+
+        if df.empty:
+            res["result"] = {}
+            return res
+        
+        year_start = self.get_start_year(df)
+        year_end = self.get_end_year(df)
+
+        tmp = []
+
+        for year in range(year_start,year_end + 1):
+            year_info = self.get_year_income(df,year)
+            for (month,income) in enumerate(year_info):
+                tmp_res = {}
+                if income != 0:
+                    tmp_res["month"] = "%s.%s" % (year,(("%s" % (month + 1)).zfill(2)) )
+                    tmp_res["money"] = income
+                    tmp.append(tmp_res)
+
+        res["result"] = tmp
+        return res
+                
+            
+
+    def get_outcome(self,df):
+        res = {}
+        res["state"] = False if df.empty else True
+
+        if df.empty:
+            res["result"] = {}
+            return res
+        
+        year_start = self.get_start_year(df)
+        year_end = self.get_end_year(df)
+
+        tmp = []
+
+        for year in range(year_start,year_end + 1):
+            year_info = self.get_year_outcome(df,year)
+            for (month,outcome) in enumerate(year_info):
+                tmp_res = {}
+                if outcome != 0:
+                    tmp_res["month"] = "%s.%s" % (year,(("%s" % (month + 1)).zfill(2)) )
+                    tmp_res["money"] = outcome
+                    tmp.append(tmp_res)
+
+        res["result"] = tmp
+        return res
+
+    def get_start_year(self,df):
+        return int(df["交易时间"].min() / 10**10)
+
+    def get_end_year(self,df):
+        return int(df["交易时间"].max() / 10**10)
+
         

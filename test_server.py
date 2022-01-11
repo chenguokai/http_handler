@@ -17,7 +17,7 @@ def test_invalid_file():
         assert "Error: unable to start thread"
 
     time.sleep(1)
-    conn = http.client.HTTPConnection("localhost:8000")
+    conn = http.client.HTTPConnection("localhost:8080")
 
     # invalid file
     conn.request("GET", "/doc")
@@ -34,7 +34,7 @@ def test_invalid_parameter():
         assert "Error: unable to start thread"
 
     time.sleep(1)
-    conn = http.client.HTTPConnection("localhost:8000")
+    conn = http.client.HTTPConnection("localhost:8080")
 
     # valid file invalid parameter
     conn.request("GET", "/e_call?token=2333&uuid=0000")
@@ -51,16 +51,49 @@ def test_valid_request():
         assert "Error: unable to start thread"
 
     time.sleep(1)
-    conn = http.client.HTTPConnection("localhost:8000")
+    conn = http.client.HTTPConnection("localhost:8080")
 
     # valid file invalid parameter
-    conn.request("GET", "/j_call?uuid=0000&token=2333")
+    conn.request("GET", "/sort?uuid=0000&token=2333")
     r1 = conn.getresponse()
     content = r1.read()
-    print("status=", r1.status, "content=", content)
+    print("status=", r1.status, "content=", json.loads(content))
     conn.close()
     assert r1.status == 200
 
+def test_month_outcome():
+    try:
+         _thread.start_new_thread(main, ())
+    except:
+        assert "Error: unable to start thread"
+
+    time.sleep(1)
+    conn = http.client.HTTPConnection("localhost:8080")
+
+    # valid file invalid parameter
+    conn.request("GET", "/monthOutcome?uuid=0000&token=2333")
+    r1 = conn.getresponse()
+    content = r1.read()
+    print("status=", r1.status, "content=", json.loads(content))
+    conn.close()
+    assert r1.status == 200
+
+def test_month_income():
+    try:
+         _thread.start_new_thread(main, ())
+    except:
+        assert "Error: unable to start thread"
+
+    time.sleep(1)
+    conn = http.client.HTTPConnection("localhost:8080")
+
+    # valid file invalid parameter
+    conn.request("GET", "/monthIncome?uuid=0000&token=2333")
+    r1 = conn.getresponse()
+    content = r1.read()
+    print("status=", r1.status, "content=", json.loads(content))
+    conn.close()
+    assert r1.status == 200
 '''
 
     # valid file valid parameter
@@ -145,3 +178,15 @@ if __name__ == "__main__":
         pass
         
 '''
+
+if __name__ == "__main__":
+    print("starting test")
+
+    test_invalid_file()
+    test_invalid_parameter()
+    test_valid_request()
+    test_month_income()
+    test_month_outcome()
+
+    while 1:
+        pass

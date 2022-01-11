@@ -2,6 +2,7 @@ import socket
 import re
 import sys
 import os
+import json
 
 from controller import webController
 
@@ -79,18 +80,21 @@ class HTTPServer(object):
         if method == "POST":
             parameter = request_lines[-1]
             print("parameter for post: ", parameter)
+            parameters = json.loads(parameter)
+            parameter_uuid = parameters["uuid"]
+            parameter_token = parameters["token"]
         else:
             parameter = str.encode(parameter)
-        encoding = 'utf-8'
-        parameter_seperator_idx = parameter.find(b"&")
-        parameter_uuid_idx = parameter.find(b"uuid=")
-        parameter_token_idx = parameter.find(b"token=")
-        if (parameter_uuid_idx >= parameter_seperator_idx or parameter_token_idx < parameter_seperator_idx):
-            parameter_uuid = None
-            parameter_token = None
-        else:
-            parameter_uuid = parameter[parameter_uuid_idx + 5:parameter_seperator_idx].decode(encoding)
-            parameter_token = parameter[parameter_token_idx + 6:].decode(encoding)
+            encoding = 'utf-8'
+            parameter_seperator_idx = parameter.find(b"&")
+            parameter_uuid_idx = parameter.find(b"uuid=")
+            parameter_token_idx = parameter.find(b"token=")
+            if (parameter_uuid_idx >= parameter_seperator_idx or parameter_token_idx < parameter_seperator_idx):
+                parameter_uuid = None
+                parameter_token = None
+            else:
+                parameter_uuid = parameter[parameter_uuid_idx + 5:parameter_seperator_idx].decode(encoding)
+                parameter_token = parameter[parameter_token_idx + 6:].decode(encoding)
         print("uuid=", parameter_uuid, ", token=", parameter_token)
         handler = webController()
         handler.web_params(file_name, parameter_token, parameter_uuid)

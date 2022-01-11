@@ -24,7 +24,10 @@ class Controller:
         self._token = token
         self._uuid = uuid
 
-    def add_to_database(self, uuid, token):
+    def add_to_database(self, backend_invalid):
+        parameters = json.loads(parameter)
+        uuid = parameters["uuid"]
+        token = parameters["token"]
         self.uuid_token_dic[uuid] = token
     def find(self, uuid):
         if uuid in self.uuid_token_dic:
@@ -47,9 +50,9 @@ class webController(Controller):
                 return self.code_ok + self.server_info + self.backend_invalid
             else:
                 return self.code_ok + self.server_info + backend_response
-        if self._uuid is None or self._token is None:
-            return self.code_not_found + self.server_info + self.request_invalid
-        self.add_to_database(self._uuid, self._token)
+        #if self._uuid is None or self._token is None:
+        #    return self.code_not_found + self.server_info + self.request_invalid
+        self.add_to_database(self.backend_invalid)
         return self.code_ok + self.server_info + self.reply_received
 
     def handle_get(self):

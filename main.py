@@ -79,7 +79,8 @@ class HTTPServer(object):
         if method == "POST":
             parameter = request_lines[-1]
             print("parameter for post: ", parameter)
-
+        else:
+            parameter = str.encode(parameter)
         encoding = 'utf-8'
         parameter_seperator_idx = parameter.find(b"&")
         parameter_uuid_idx = parameter.find(b"uuid=")

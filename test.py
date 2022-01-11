@@ -3,6 +3,7 @@ import os
 import _thread
 import time
 import http.client
+import json
 
 lib_path = os.path.abspath(os.path.join('..'))
 sys.path.append(lib_path)
@@ -100,6 +101,19 @@ def test():
         tot_pass = tot_pass + 1
     else:
         print("Test point 7 fail")
+
+    # post and query
+    conn.request("GET", "/j_call?uuid=user1&token=2334")
+    r1 = conn.getresponse()
+    content = r1.read()
+    print("status=", r1.status, "content=", content)
+    conn.close()
+    if r1.status == 200:
+        print(json.loads(content))
+        print("Test point 8 pass")
+        tot_pass = tot_pass + 1
+    else:
+        print("Test point 8 fail")
 
     print("Total poss", tot_pass, "points")
 

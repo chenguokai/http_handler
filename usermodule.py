@@ -50,20 +50,6 @@ class UserModule:
             return json.dumps(self.construct_return(False, "wrong username or password", ''))
         md5pw = hashlib.md5(password.encode(encoding='UTF-8')).hexdigest()
         if md5pw == find_result[0][1]:
-	    """
-            conn = http.client.HTTPConnection("localhost:8000")
-            uuidstr = str(uuid.uuid4())
-            poststr = "/append?uuid=" + name + "&token=" + uuidstr
-            conn.request("POST", poststr)
-            res = conn.getresponse()
-            content = res.read()
-            #print("status=", res.status, "content=", content)
-            conn.close()
-            if res.status == 200 and content == bytes("Map Received", "ascii"):
-                return json.dumps(self.construct_return(True, "login succeeded", uuidstr))
-            else:
-                return json.dumps(self.construct_return(False, "login failed because of server error", ''))
-	    """
             return json.dumps(self.construct_return(True, "login succeeded", uuidstr))
         else:
             return json.dumps(self.construct_return(False, "wrong username or password", ''))

@@ -44,9 +44,9 @@ def test_invalid_parameter():
     conn.close()
     assert r1.status == 404 and content == bytes("You are sending an invalid request", "ascii")
 
-def test_invalid_parameter():
+def test_valid_request():
     try:
-        _thread.start_new_thread(main, ())
+         _thread.start_new_thread(main, ())
     except:
         assert "Error: unable to start thread"
 

@@ -52,9 +52,9 @@ class UserModule:
             #         ├── data
             #         └── upload.php
 
-            base = "/var/www/html/data/"
+            base = "/var/www/html"
             php_path = os.path.join(base,"upload.php")
-            user_path = os.path.join(base,name)
+            user_path = os.path.join(base,"data",name)
             wechat_user_path = os.path.join(user_path,"wechat")
             alipay_user_path = os.path.join(user_path,"alipay")
             if not os.path.exists(user_path):

@@ -12,7 +12,7 @@ class Wrapper:
         df2 = self.clean_helper_alipay.PreProcess(user)
         self.csv_file = self.concate(df1,df2)
 
-        self.query_helper = DataQueryHelper()
+        self.query_helper = DataQueryHelper(user)
 
     def concate(self,df1,df2):
         if df1.empty and df2.empty:

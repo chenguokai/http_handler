@@ -1,6 +1,10 @@
 import numpy as np
+from BillHelper import BillHelper
+from Config import config
 
 class DataQueryHelper:
+     def __init__(self, user):
+        self.bill_helper = BillHelper(user)
 
     def __select_date(self,df, year_start=2021, month_start=1, day_start=1, year_end=2021, month_end=12, day_end=31):
         date_start = year_start*10**10+month_start*10**8+day_start*10**6
@@ -16,11 +20,21 @@ class DataQueryHelper:
 
     def get_monthly_income(self,df,year,month):
         data = self.__select_date(df,year_start=year,year_end=year,month_start=month,month_end=month)
-        return self.__get_income(data)
+        if config.disable_database:
+            return round(self.__get_income(data),2)
+        else:
+            income = self.__get_income(data)
+            self.bill_helper.insert_bill_table(year, month, income, True)
+            return round(self.bill_helper.select_bill_table(year, month, True), 2)
 
     def get_monthly_outcome(self,df,year,month):
         data = self.__select_date(df,year_start=year,year_end=year,month_start=month,month_end=month)
-        return self.__get_outcome(data)
+        if config.disable_database:
+            return round(self.__get_outcome(data),2)
+        else:
+            outcome = self.__get_outcome(data)
+            self.bill_helper.insert_bill_table(year, month, outcome, False)
+            return round(self.bill_helper.select_bill_table(year, month, False), 2)
 
     def get_year_income(self,df,year):
         '''
@@ -68,9 +82,18 @@ class DataQueryHelper:
                 money = self.__get_income(value)
 
             if money != 0.0:
-                item["category"] = key
-                item["amount"] = money
-                item["repeat"] = float(value[value["收/支"] == '支出']["金额"].count())
+                if(config.disable_database):
+                    item["category"] = key
+                    item["amount"] = round(money, 2)
+                    item["repeat"] = float(value[value["收/支"] == '支出']["金额"].count())
+                else:
+                    print(key)
+                    count = float(value[value["收/支"] == '支出']["金额"].count())
+                    self.bill_helper.insert_category(key, money, count)
+                    [money, count] = self.bill_helper.select_category(key)
+                    item["category"] = key
+                    item["amount"] = round(money, 2)
+                    item["repeat"] = count
                 result.append(item)
         return sorted(result, key=lambda item:item["amount"], reverse=True)
 

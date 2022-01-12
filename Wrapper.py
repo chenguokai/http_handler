@@ -27,7 +27,7 @@ class Wrapper:
     def query_all(self,type):
         res = {}
         res["state"] = False if self.csv_file.empty else True
-        res["result"] = self.query_helper.sort_by_cost(self.csv_file,type,True)
+        res["result"] = self.query_helper.sort_by_cost(self.csv_file,type,ISoutcome=True)
 
         return json.dumps(res)
 

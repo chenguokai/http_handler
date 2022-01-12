@@ -41,7 +41,35 @@ class UserModule:
         if result == False:
             return json.dumps(self.construct_return(False, "database error", ''))
         else:
-            os.mkdir("/var/www/html/data/" + name)
+            # test TBD
+            # structure like this:
+            # .
+            # └── 0001
+            #     ├── alipay
+            #     │   ├── data
+            #     │   └── upload.php
+            #     └── wechat
+            #         ├── data
+            #         └── upload.php
+
+            base = "/var/www/html/data/"
+            php_path = os.path.join(base,"upload.php")
+            user_path = os.path.join(base,name)
+            wechat_user_path = os.path.join(user_path,"wechat")
+            alipay_user_path = os.path.join(user_path,"alipay")
+            if not os.path.exists(user_path):
+                os.makedirs(user_path)
+            if not os.path.exists(wechat_user_path):
+                os.makedirs(wechat_user_path)
+            if not os.path.exists(alipay_user_path):
+                os.makedirs(alipay_user_path)
+
+            os.mkdir(os.path.join(wechat_user_path,"data"))
+            os.mkdir(os.path.join(alipay_user_path,"data"))
+
+            os.system("cp %s %s" % (php_path,wechat_user_path))
+            os.system("cp %s %s" % (php_path,alipay_user_path))
+            
             return json.dumps(self.construct_return(True, "registration succeeded", ''))
 
     def login(self, name, password):

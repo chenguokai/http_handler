@@ -12,47 +12,22 @@ class DataQueryHelper:
         res = df[(date_start <= df["交易时间"]) & (df["交易时间"] < date_end)]
         return res
 
-    def __get_income(self,df):
-        return df[df["收/支"] == '收入']["金额"].sum()
+    def __get_income_or_outcome(self,df,ISoutcome=True):
+        if ISoutcome:
+            return df[df["收/支"] == '支出']["金额"].sum()
+        else:
+            return df[df["收/支"] == '收入']["金额"].sum()
 
-    def __get_outcome(self,df):
-        return df[df["收/支"] == '支出']["金额"].sum()
-
-    def get_monthly_income(self,df,year,month):
+    def __get_monthly_income_or_outcome(self,df,year,month,ISoutcome=True):
         data = self.__select_date(df,year_start=year,year_end=year,month_start=month,month_end=month)
         if config.disable_database:
-            return round(self.__get_income(data),2)
+            return round(self.__get_income_or_outcome(data,ISoutcome),2)
         else:
-            income = self.__get_income(data)
-            self.bill_helper.insert_bill_table(year, month, income, True)
+            result = self.__get_income_or_outcome(data,ISoutcome)
+            self.bill_helper.insert_bill_table(year, month, result, True)
             return round(self.bill_helper.select_bill_table(year, month, True), 2)
 
-    def get_monthly_outcome(self,df,year,month):
-        data = self.__select_date(df,year_start=year,year_end=year,month_start=month,month_end=month)
-        if config.disable_database:
-            return round(self.__get_outcome(data),2)
-        else:
-            outcome = self.__get_outcome(data)
-            self.bill_helper.insert_bill_table(year, month, outcome, False)
-            return round(self.bill_helper.select_bill_table(year, month, False), 2)
-
-    def get_year_income(self,df,year):
-        '''
-        format 
-        [
-            '1' : 10,
-            '2' : 1000,
-            ...
-            '12' : 1000
-        ]
-        '''
-        result = []
-        for i in range(12):
-            result.append(self.get_monthly_income(df,year,i+1))
-        return result
-
-
-    def get_year_outcome(self,df,year):
+    def __get_year_income_or_outcome(self,df,year,ISoutcome=True):
         '''
         format
         [
@@ -64,8 +39,14 @@ class DataQueryHelper:
         '''
         result = []
         for i in range(12):
-            result.append(self.get_monthly_outcome(df,year,i+1))
+            result.append(self.__get_monthly_income_or_outcome(df,year,i+1,ISoutcome))
         return result
+
+    def __get_start_year(self,df):
+        return int(df["交易时间"].min() / 10**10)
+
+    def __get_end_year(self,df):
+        return int(df["交易时间"].max() / 10**10)
 
     def sort_by_cost(self,df,type,ISoutcome=True):
         '''
@@ -76,19 +57,22 @@ class DataQueryHelper:
         data = df.groupby(type)
         for key,value in data:
             item = {}
-            if ISoutcome:
-                money = self.__get_outcome(value)
-            else:
-                money = self.__get_income(value)
+            money = self.__get_income_or_outcome(value,ISoutcome)
 
             if money != 0.0:
                 if(config.disable_database):
                     item["category"] = key
                     item["amount"] = round(money, 2)
-                    item["repeat"] = float(value[value["收/支"] == '支出']["金额"].count())
+                    if ISoutcome:
+                        item["repeat"] = float(value[value["收/支"] == '支出']["金额"].count())
+                    else:
+                        item["repeat"] = float(value[value["收/支"] == '收入']["金额"].count())
                 else:
                     print(key)
-                    count = float(value[value["收/支"] == '支出']["金额"].count())
+                    if ISoutcome:
+                        count = float(value[value["收/支"] == '支出']["金额"].count())
+                    else:
+                        count = float(value[value["收/支"] == '收入']["金额"].count())
                     self.bill_helper.insert_category(key, money, count)
                     [money, count] = self.bill_helper.select_category(key)
                     item["category"] = key
@@ -97,28 +81,7 @@ class DataQueryHelper:
                 result.append(item)
         return sorted(result, key=lambda item:item["amount"], reverse=True)
 
-    def sort_by_frequency(self,df,type,ISoutcome=True):
-        '''
-        type:'交易对方' or '类型' or ...
-        ISoutcome: True -> 根据支出分类 ; False -> 根据收入分类
-        '''
-        result = {}
-        keys = df['交易对方'].value_counts().keys()
-        values = df['交易对方'].value_counts()
-
-        for key in keys:
-            result[key] = float(values[key])
-        return sorted(result.items(), key=lambda item:item[1], reverse=True)
-
-    def query_valid_year(self,df,year):
-        tmp = self.get_year_outcome(df,year)
-        res = []
-        for i in range(12):
-            if tmp[(i + 1)] != 0:
-                res.append((i + 1))
-        return res
-
-    def get_income(self,df):
+    def get_income_or_outcome(self,df,ISoutcome=True):
         res = {}
         res["state"] = False if df.empty else True
 
@@ -126,54 +89,19 @@ class DataQueryHelper:
             res["result"] = {}
             return res
         
-        year_start = self.get_start_year(df)
-        year_end = self.get_end_year(df)
+        year_start = self.__get_start_year(df)
+        year_end = self.__get_end_year(df)
 
         tmp = []
 
         for year in range(year_start,year_end + 1):
-            year_info = self.get_year_income(df,year)
-            for (month,income) in enumerate(year_info):
+            year_info = self.__get_year_income_or_outcome(df,year,ISoutcome)
+            for (month,money) in enumerate(year_info):
                 tmp_res = {}
-                if income != 0:
+                if money != 0:
                     tmp_res["month"] = "%s.%s" % (year,(("%s" % (month + 1)).zfill(2)) )
-                    tmp_res["money"] = income
+                    tmp_res["money"] = money
                     tmp.append(tmp_res)
 
         res["result"] = tmp
         return res
-                
-            
-
-    def get_outcome(self,df):
-        res = {}
-        res["state"] = False if df.empty else True
-
-        if df.empty:
-            res["result"] = {}
-            return res
-        
-        year_start = self.get_start_year(df)
-        year_end = self.get_end_year(df)
-
-        tmp = []
-
-        for year in range(year_start,year_end + 1):
-            year_info = self.get_year_outcome(df,year)
-            for (month,outcome) in enumerate(year_info):
-                tmp_res = {}
-                if outcome != 0:
-                    tmp_res["month"] = "%s.%s" % (year,(("%s" % (month + 1)).zfill(2)) )
-                    tmp_res["money"] = outcome
-                    tmp.append(tmp_res)
-
-        res["result"] = tmp
-        return res
-
-    def get_start_year(self,df):
-        return int(df["交易时间"].min() / 10**10)
-
-    def get_end_year(self,df):
-        return int(df["交易时间"].max() / 10**10)
-
-        

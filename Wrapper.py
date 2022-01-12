@@ -24,30 +24,6 @@ class Wrapper:
         else:
             return pd.concat([df1,df2], axis=0) 
 
-    def get_monthly_income(self,year,month):
-        res = {}
-        res["res"] = self.query_helper.get_monthly_income(self.csv_file,year,month)
-        return json.dumps(res)
-    
-    def get_monthly_outcome(self,year,month):
-        res = {}
-        res["res"] = self.query_helper.get_monthly_outcome(self.csv_file,year,month)
-        return json.dumps(res)
-
-    def get_year_income(self,year):
-        return json.dumps(self.query_helper.get_year_income(self.csv_file,year))
-    
-    def get_year_outcome(self,year):
-        return json.dumps(self.query_helper.get_year_outcome(self.csv_file,year))
-
-    def sort_by_cost(self,type,ISoutcome=True):
-        res = {}
-        res["res"] = self.query_helper.sort_by_cost(self.csv_file,type,ISoutcome)
-        return json.dumps(res)
-
-    def sort_by_frequency(self,type,ISoutcome=True):
-        return json.dumps(self.query_helper.sort_by_frequency(self.csv_file,type,ISoutcome))
-
     def query_all(self,type):
         res = {}
         res["state"] = False if self.csv_file.empty else True
@@ -56,7 +32,7 @@ class Wrapper:
         return json.dumps(res)
 
     def get_outcome(self):
-        return json.dumps(self.query_helper.get_outcome(self.csv_file))
+        return json.dumps(self.query_helper.get_income_or_outcome(self.csv_file,ISoutcome=True))
 
     def get_income(self):
-        return json.dumps(self.query_helper.get_income(self.csv_file))
+        return json.dumps(self.query_helper.get_income_or_outcome(self.csv_file,ISoutcome=False))

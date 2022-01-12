@@ -11,6 +11,11 @@ class DataCleanHelper:
         self.__focus = config.focus
 
     def is_wechat(self,file):
+        '''
+        判断是否是微信文件
+        是 -> 微信支付账单明细列表 所在行号
+        否 -> -1
+        '''
         with open(file,"r",encoding=self.__encoding) as f:
             lines = f.readlines()
         start_line = 0;
@@ -20,7 +25,7 @@ class DataCleanHelper:
                 return start_line
         return -1
 
-    def data_clean(self,csv_file,raw_file):
+    def data_clean(self,csv_file):
 
         if("金额(元)" in csv_file.columns):
             csv_file.rename(columns={"金额(元)":"金额"},inplace=True)
@@ -33,7 +38,7 @@ class DataCleanHelper:
         if('交易对方            ' in csv_file.columns):
             csv_file.rename(columns={'交易对方            ':"交易对方"},inplace=True)
         
-        if(self.is_wechat(raw_file) != -1):
+        if(self.isWechat):
             csv_file["金额"] = csv_file["金额"].str.replace("¥","");
 
         csv_file["收/支"] = csv_file["收/支"].str.replace("      ",""); 
@@ -125,9 +130,6 @@ class DataCleanHelper:
 
         csv_file = pd.read_csv(target_file,encoding=self.__encoding)
 
-        self.data_clean(csv_file,raw_file)
-        
-        # if(DEBUG):
-        #     print(csv_file.head(10))
+        self.data_clean(csv_file)
 
         return csv_file

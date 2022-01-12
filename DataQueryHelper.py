@@ -3,7 +3,7 @@ from BillHelper import BillHelper
 from Config import config
 
 class DataQueryHelper:
-     def __init__(self, user):
+    def __init__(self, user):
         self.bill_helper = BillHelper(user)
 
     def __select_date(self,df, year_start=2021, month_start=1, day_start=1, year_end=2021, month_end=12, day_end=31):

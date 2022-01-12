@@ -82,12 +82,13 @@ class DataCleanHelper:
         
         '''
         USER = user
-        PWD = os.path.abspath('.')
+        BASE = config.path
         prefix = "wechat" if self.isWechat else "alipay"
-        FILE_RAW = os.path.join(PWD,"resources",USER,prefix,"raw")
+        FILE_RAW = os.path.join(BASE,USER,prefix,"data")
         DIR_RAW = os.listdir(FILE_RAW)
-        FILE_CSV = os.path.join(PWD,"resources",USER,prefix,"clean")
-        DIR_CSV = os.listdir(FILE_CSV)
+        FILE_CSV = os.path.join(BASE,USER,prefix,"clean")
+        if not os.path.exists(FILE_CSV):
+            os.mkdir(FILE_CSV)
         flag = -1
 
         # name of the columns

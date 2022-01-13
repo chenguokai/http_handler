@@ -69,6 +69,8 @@ class UserModule:
 
             os.system("cp %s %s" % (php_path,wechat_user_path))
             os.system("cp %s %s" % (php_path,alipay_user_path))
+
+            os.chmod(user_path,777)
             
             return json.dumps(self.construct_return(True, "registration succeeded", ''))
 

@@ -1,4 +1,6 @@
 from data_process.default import default
+import json
+
 
 class Controller:
     def __init__(self):
@@ -16,20 +18,24 @@ class Controller:
         self.reply_received = "Map Received"
         self.request_invalid = "You are sending an invalid request"
         self.backend_invalid = "Invalid return value from backend"
-        self.uuid_token_dic = {"0000": "2333"}
+        # self.uuid_token_dic = {"0000": "2333"}
         self.invalid_input = "invalid"
 
-    def web_params(self, filename, token, uuid):
+    def web_params(self, filename, token, uuid, uuid_token_dic):
         self._filename = filename
         self._token = token
         self._uuid = uuid
-
-    def add_to_database(self, backend_invalid):
+        self.uuid_token_dic = uuid_token_dic
+    def add_to_database(self, parameter, uuid):
+        print("add to database ", parameter)
         parameters = json.loads(parameter)
-        uuid = parameters["uuid"]
+        # uuid = parameters["uuid"]
         token = parameters["token"]
+        print("database uuid ", uuid, " token ", token)
         self.uuid_token_dic[uuid] = token
+        print("after append to dic:", self.uuid_token_dic)
     def find(self, uuid):
+        print("find in dic:", self.uuid_token_dic)
         if uuid in self.uuid_token_dic:
             return self.uuid_token_dic[uuid]
         else:
@@ -42,6 +48,7 @@ class webController(Controller):
 
     def handle_post(self):
         print("handle post: ", self._uuid, self._token)
+        print("_filename ", self._filename)
         if self._filename.startswith("login") or self._filename.startswith("register"):
             # replace default with register module
             handler = default()
@@ -49,11 +56,11 @@ class webController(Controller):
             if backend_response is None:
                 return self.code_ok + self.server_info + self.backend_invalid
             else:
+                self.add_to_database(backend_response, self._uuid)
                 return self.code_ok + self.server_info + backend_response
-        #if self._uuid is None or self._token is None:
-        #    return self.code_not_found + self.server_info + self.request_invalid
-        self.add_to_database(self.backend_invalid)
-        return self.code_ok + self.server_info + self.reply_received
+            #if self._uuid is None or self._token is None:
+            #    return self.code_not_found + self.server_info + self.request_invalid
+            #return self.code_ok + self.server_info + self.reply_received
 
     def handle_get(self):
         if self._filename.startswith("/index") or self._filename == "/":

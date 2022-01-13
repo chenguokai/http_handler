@@ -12,13 +12,14 @@ sys.path.append(lib_path)
 from data_process.default import default
 
 from multiprocessing import Process
+import multiprocessing
 
 # 设置静态文件根目录
 HTML_ROOT_DIR = "./html"
 # 设置动态文件根目录
 WSGI_PYTHON_DIR = "./data_process"
 
-uuid_token_dic = {"0000": "2333"}
+uuid_token_dic = multiprocessing.Manager().dict()
 uuid_length = 4
 token_length = 4
 
@@ -30,13 +31,13 @@ class HTTPServer(object):
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+        self.handler = webController()
     def start(self):
         self.server_socket.listen(128)
         while True:
             client_socket, client_address = self.server_socket.accept()
             # print("[%s, %s]用户连接上了" % client_address)
-            handle_client_process = Process(target=self.handle_client, args=(client_socket,))
+            handle_client_process = Process(target=self.handle_client, args=(client_socket, uuid_token_dic,))
             handle_client_process.start()
             client_socket.close()
 
@@ -47,7 +48,7 @@ class HTTPServer(object):
 
         self.response_headers = response_headers
 
-    def handle_client(self, client_socket):
+    def handle_client(self, client_socket, uuid_token_dic):
         """
         处理客户端请求
         """
@@ -96,13 +97,12 @@ class HTTPServer(object):
                 parameter_uuid = parameter[parameter_uuid_idx + 5:parameter_seperator_idx].decode(encoding)
                 parameter_token = parameter[parameter_token_idx + 6:].decode(encoding)
         print("uuid=", parameter_uuid, ", token=", parameter_token)
-        handler = webController()
-        handler.web_params(file_name, parameter_token, parameter_uuid)
+        self.handler.web_params(file_name, parameter_token, parameter_uuid, uuid_token_dic)
         print("debug: method type ", type(method))
-        handler.request = method
+        self.handler.request = method
 
 
-        response = handler.reply
+        response = self.handler.reply
         # print("response data:", response)
 
         # 向客户端返回响应数据
